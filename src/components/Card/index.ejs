@@ -1,8 +1,0 @@
-<% 
-    const template = require("./ui/template.ejs"); 
-    defaultProps = require("./config/data.json");
-    const args = arguments[0]
-    const props = Object.assign({}, defaultProps, args)
-%>
-
-<%- template(props) %>
