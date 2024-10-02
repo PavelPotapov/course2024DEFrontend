@@ -146,7 +146,7 @@ export default async (env, { mode }) => {
 					test: /\.(png|jpe?g|gif|svg)$/i,
 					type: "asset/resource",
 					generator: {
-						filename: "assets/images/[hash][ext][query]",
+						filename: "assets/images/[name][ext]",
 					},
 				},
 			],
@@ -180,5 +180,6 @@ export default async (env, { mode }) => {
 			},
 			extensions: [".js", ".pcss"],
 		},
+		devtool: isDev ? "eval-source-map" : "source-map",
 	}
 }

@@ -1,1 +1,0 @@
-(()=>{"use strict";class t{constructor(){console.debug("constructor for ButtonModel")}}document.addEventListener("DOMContentLoaded",(()=>{new t}))})();

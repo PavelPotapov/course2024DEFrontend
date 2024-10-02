@@ -1,4 +1,4 @@
-import { API_ENDPOINTS } from "@shared/config/constants"
+import { API_ENDPOINTS } from "@shared/config/constants/index"
 
 export class ButtonModel {
 	constructor() {
