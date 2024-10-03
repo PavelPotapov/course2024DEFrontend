@@ -1,11 +1,20 @@
 import "./styles.js"
-import { ButtonModel } from "@components/Button/model"
+import { ButtonModel } from "@components/Button/model";
 
-document.addEventListener("DOMContentLoaded", async () => {
-	if (process.env.NODE_ENV === "development") {
-		const { getMocks } = await import("@shared/api/lib/index.js")
-		await getMocks()
-		console.debug("MSW ready")
-	}
-	new ButtonModel()
-})
+const runApp = () => {
+  document.addEventListener("DOMContentLoaded", async () => {
+    new ButtonModel()
+  })
+};
+
+if (process.env.NODE_ENV === "development") {
+  import("@shared/api/lib/index.js")
+    .then(({ getMocks }) => getMocks().finally(() => { runApp(); }));
+
+} else {
+  document.addEventListener("DOMContentLoaded", async () => {
+    new ButtonModel()
+  })
+}
+
+

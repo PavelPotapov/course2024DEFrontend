@@ -6,7 +6,7 @@
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "webpack serve --mode development --config webpack.config.mjs",
+		"start": "webpack serve --mode development --env API_URL=123 --config webpack.config.mjs",
 		"build": "webpack --mode production --config webpack.config.mjs"
 	},
 	"keywords": [],
@@ -19,6 +19,7 @@
 		"html-webpack-plugin": "^5.6.0",
 		"mini-css-extract-plugin": "^2.9.1",
 		"msw": "^2.4.9",
+		"path": "^0.12.7",
 		"postcss": "^8.4.47",
 		"postcss-loader": "^8.1.1",
 		"style-loader": "^4.0.0",

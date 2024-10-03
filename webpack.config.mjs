@@ -66,12 +66,11 @@ export const generatePages = async (isDev) => {
 				const pageName = file.split(".")[0]
 
 				// Используем pathToFileURL для корректной обработки путей, ВАЖНО!
-				const pageModuleUrl = pathToFileURL(join(pagesDir, file)).href
-				const { default: pageContent } = await import(pageModuleUrl)
+				const template = import.meta.resolve(join(pagesDir, file));
 
 				return new HtmlWebpackPlugin({
 					filename: `${pageName}.html`,
-					templateContent: pageContent(),
+					template,
 					minify: {
 						collapseWhitespace: !isDev,
 					},
@@ -100,15 +99,15 @@ const copyFolders = (folders) => {
 }
 
 export default async (env, { mode }) => {
-	const isDev = mode === "development" ? true : false
+	const isDev = mode === "development"
 	const pages = await generatePages(isDev)
 	writeStylesToFile()
 	return {
-		mode: isDev ? "development" : "production",
+		mode,
 		entry: path.join(baseDir, "app.js"),
 		output: {
 			path: buildDir,
-			filename: "[name].[contenthash].bundle.js",
+			filename: "[name].js",
 			clean: true,
 		},
 		devServer: {
@@ -161,7 +160,7 @@ export default async (env, { mode }) => {
 			}),
 			new webpack.DefinePlugin({
 				"process.env.API_URL": JSON.stringify(
-					process.env.API_URL || "http://localhost:8888"
+					env.API_URL || "/api/v1/"
 				),
 			}),
 		],
@@ -180,6 +179,6 @@ export default async (env, { mode }) => {
 			},
 			extensions: [".js", ".pcss"],
 		},
-		devtool: isDev ? "eval-source-map" : "source-map",
+		devtool: isDev ? "eval-source-map" : false,
 	}
 }
