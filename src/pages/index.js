@@ -1,3 +1,5 @@
+import { Button } from "../shared/ui/Button/index.js"
+
 const IndexPage = () => `
   <!DOCTYPE html>
   <html lang="en">
@@ -12,6 +14,7 @@ const IndexPage = () => `
       </header>
       <main>
         <p>Hello world!</p>
+        ${Button({ text: "HI!" })}
       </main>
     </body>
   </html>

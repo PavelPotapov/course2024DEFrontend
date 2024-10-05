@@ -1,6 +1,5 @@
 import path from "path"
-import { fileURLToPath, pathToFileURL } from "url"
-import fs from "fs"
+import { fileURLToPath } from "url"
 import HtmlWebpackPlugin from "html-webpack-plugin"
 
 const __filename = fileURLToPath(import.meta.url)
@@ -8,31 +7,11 @@ const __dirname = path.dirname(__filename)
 
 const baseDir = path.resolve(__dirname, "./src")
 const buildDir = path.resolve(__dirname, "./build")
+const publicDir = path.resolve(__dirname, "./public")
 const pagesDir = path.resolve(__dirname, "./src/pages")
-
-export const generatePages = async () => {
-	const pageFiles = fs.readdirSync(pagesDir)
-	const plugins = await Promise.all(
-		pageFiles
-			.filter((file) => file.endsWith(".js"))
-			.map(async (file) => {
-				const pageName = file.split(".")[0]
-
-				const template = import.meta.resolve(path.join(pagesDir, file))
-
-				return new HtmlWebpackPlugin({
-					filename: `${pageName}.html`,
-					template,
-				})
-			})
-	)
-
-	return plugins
-}
 
 export default async (env, { mode }) => {
 	const isDev = mode === "development"
-	const pages = await generatePages(isDev)
 	return {
 		mode,
 		entry: path.join(baseDir, "app.js"),
@@ -41,7 +20,45 @@ export default async (env, { mode }) => {
 			filename: "[name].js",
 			clean: true,
 		},
-
-		plugins: [...pages],
+		devServer: {
+			static: {
+				directory: publicDir,
+			},
+			port: 8888,
+			open: true,
+			historyApiFallback: true,
+			hot: true,
+			watchFiles: [
+				"src/**/*.js",
+				"src/**/*.css",
+				"src/**/*.html",
+				"src/**/*.json",
+			],
+		},
+		module: {
+			rules: [
+				{
+					test: /\.pcss$/,
+					use: [
+						"style-loader",
+						{
+							loader: "css-loader",
+							options: {
+								importLoaders: 1,
+								sourceMap: isDev ? true : false,
+							},
+						},
+						"postcss-loader",
+					],
+				},
+			],
+		},
+		plugins: [
+			new HtmlWebpackPlugin({
+				filename: "index.html",
+				template: path.join(pagesDir, "index.js"),
+			}),
+		],
+		devtool: isDev ? "eval-source-map" : false,
 	}
 }
