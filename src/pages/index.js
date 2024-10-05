@@ -1,5 +1,3 @@
-import { Button } from "../components/Button/ui/Button.js"
-
 const IndexPage = () => `
   <!DOCTYPE html>
   <html lang="en">
@@ -13,8 +11,7 @@ const IndexPage = () => `
         <h1>Welcome to the Home Page</h1>
       </header>
       <main>
-        <p>This is the home page content! 11</p>
-        ${Button({ text: "Привет" })}
+        <p>Hello world!</p>
       </main>
     </body>
   </html>

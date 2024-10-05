@@ -1,2 +1,0 @@
-(()=>{"use strict";const t={news:"newsPosts"};class n{constructor(){this.btn=document.querySelector("[data-js-btn]"),this.#t(),console.debug("constructor for ButtonModel")}handleClick(n){fetch(t.news).then((t=>t.json())).then((t=>{console.debug(t)}))}#t(){this.btn&&this.btn.addEventListener("click",(t=>{this.handleClick(t)}))}}document.addEventListener("DOMContentLoaded",(async()=>{new n}))})();
-//# sourceMappingURL=main.10b983b21c435090d266.bundle.js.map
