@@ -1,15 +1,13 @@
-import path, { join } from "path"
-import { fileURLToPath, pathToFileURL } from "url"
+import path from "path"
+import { fileURLToPath } from "url"
 import fs from "fs"
 import HtmlWebpackPlugin from "html-webpack-plugin"
 import MiniCssExtractPlugin from "mini-css-extract-plugin"
+import webpack from "webpack"
+import CopyPlugin from "copy-webpack-plugin"
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin"
 import TerserPlugin from "terser-webpack-plugin"
-import CopyPlugin from "copy-webpack-plugin"
-import webpack from "webpack"
 
-// Получаем текущий файл и директорию
-// console.debug(__dirname) //так не получится __dirname is not defined in ES module scope
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -17,70 +15,6 @@ const baseDir = path.resolve(__dirname, "./src")
 const buildDir = path.resolve(__dirname, "./build")
 const publicDir = path.resolve(__dirname, "./public")
 const pagesDir = path.resolve(__dirname, "./src/pages")
-
-const addPCSSImports = (dir) => {
-	const files = fs.readdirSync(dir)
-	let imports = ""
-
-	for (const file of files) {
-		const filePath = path.join(dir, file)
-		const stat = fs.statSync(filePath)
-
-		if (stat.isDirectory()) {
-			// Рекурсивно обрабатываем подкаталоги
-			imports += addPCSSImports(filePath)
-		} else if (file.endsWith(".pcss")) {
-			// Генерация импорта для .pcss файлов с относительным путем
-			const relativePath = path.relative(path.join(__dirname, "src"), filePath)
-			imports += `import "./${relativePath.replace(/\\/g, "/")}";\n`
-		}
-	}
-
-	return imports
-}
-
-const writeStylesToFile = () => {
-	const pcssImports = addPCSSImports(baseDir)
-
-	const stylesPath = path.join(baseDir, "styles.js")
-	// Удаление старых импортов .pcss
-	let stylesContent = fs.existsSync(stylesPath)
-		? fs.readFileSync(stylesPath, "utf8")
-		: ""
-
-	// Удаление предыдущих импортов
-	stylesContent = stylesContent.replace(/import ".*\.pcss";\n/g, "")
-	stylesContent = stylesContent.replace(/^\s*[\r\n]/gm, "") // Удаление пустых строк
-
-	// Запись новых импортов в styles.js
-	fs.writeFileSync(stylesPath, `${pcssImports}\n${stylesContent}`)
-}
-
-export const generatePages = async (isDev) => {
-	const pageFiles = fs.readdirSync(pagesDir)
-
-	const plugins = await Promise.all(
-		pageFiles
-			.filter((file) => file.endsWith(".js"))
-			.map(async (file) => {
-				const pageName = file.split(".")[0]
-
-				// Используем pathToFileURL для корректной обработки путей, ВАЖНО!
-				const pageModuleUrl = pathToFileURL(join(pagesDir, file)).href
-				const { default: pageContent } = await import(pageModuleUrl)
-
-				return new HtmlWebpackPlugin({
-					filename: `${pageName}.html`,
-					templateContent: pageContent(),
-					minify: {
-						collapseWhitespace: !isDev,
-					},
-				})
-			})
-	)
-
-	return plugins
-}
 
 const folders = ["fonts", "assets"]
 const copyFolders = (folders) => {
@@ -100,15 +34,13 @@ const copyFolders = (folders) => {
 }
 
 export default async (env, { mode }) => {
-	const isDev = mode === "development" ? true : false
-	const pages = await generatePages(isDev)
-	writeStylesToFile()
+	const isDev = mode === "development"
 	return {
-		mode: isDev ? "development" : "production",
+		mode,
 		entry: path.join(baseDir, "app.js"),
 		output: {
 			path: buildDir,
-			filename: "[name].[contenthash].bundle.js",
+			filename: "js/[name].js",
 			clean: true,
 		},
 		devServer: {
@@ -142,17 +74,13 @@ export default async (env, { mode }) => {
 						"postcss-loader",
 					],
 				},
-				{
-					test: /\.(png|jpe?g|gif|svg)$/i,
-					type: "asset/resource",
-					generator: {
-						filename: "assets/images/[name][ext]",
-					},
-				},
 			],
 		},
 		plugins: [
-			...pages,
+			new HtmlWebpackPlugin({
+				filename: "index.html",
+				template: path.join(pagesDir, "index.js"),
+			}),
 			new MiniCssExtractPlugin({
 				filename: "styles/[name][hash].css",
 			}),
@@ -160,9 +88,7 @@ export default async (env, { mode }) => {
 				patterns: [...copyFolders(folders)],
 			}),
 			new webpack.DefinePlugin({
-				"process.env.API_URL": JSON.stringify(
-					process.env.API_URL || "http://localhost:8888"
-				),
+				"process.env.API_URL": JSON.stringify(env.API_URL),
 			}),
 		],
 		optimization: {
@@ -174,12 +100,13 @@ export default async (env, { mode }) => {
 		},
 		resolve: {
 			alias: {
-				"@assets": path.resolve(__dirname, "public/assets"),
-				"@components": path.resolve(__dirname, "src/components"),
-				"@shared": path.resolve(__dirname, "src/shared"),
+				"#assets": path.resolve(__dirname, "public/assets"),
+				"#features": path.resolve(__dirname, "src/features"),
+				"#pages": path.resolve(__dirname, "src/pages"),
+				"#shared": path.resolve(__dirname, "src/shared"),
 			},
 			extensions: [".js", ".pcss"],
 		},
-		devtool: isDev ? "eval-source-map" : "source-map",
+		devtool: isDev ? "source-map" : false,
 	}
 }

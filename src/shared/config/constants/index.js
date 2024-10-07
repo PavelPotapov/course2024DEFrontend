@@ -6,5 +6,6 @@ const API_ENDPOINTS = {
 
 const API_URL = process.env.API_URL
 
-export { API_URL, API_ENDPOINTS }
+const BASE_URL = window.location.origin
 
+export { API_URL, API_ENDPOINTS, BASE_URL }

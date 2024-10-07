@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from "../config/constants/index.js"
 
 export const handlers = [
 	getResponseMock({
+		type: "GET",
 		endpoint: API_ENDPOINTS.posts.news,
 		data: {
 			items: ["Hello world!"],

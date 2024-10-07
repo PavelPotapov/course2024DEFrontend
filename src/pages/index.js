@@ -1,4 +1,4 @@
-import { Button } from "../components/Button/ui/Button.js"
+import { Button } from "#shared/ui/Button/index.js"
 
 const IndexPage = () => `
   <!DOCTYPE html>
@@ -13,8 +13,11 @@ const IndexPage = () => `
         <h1>Welcome to the Home Page</h1>
       </header>
       <main>
-        <p>This is the home page content! 11</p>
-        ${Button({ text: "Привет" })}
+        <p>Hello world!</p>
+        ${Button({
+					text: "HI!",
+					extraAttrs: [{ name: "data-js-btn-action", value: "getNews" }],
+				})}
       </main>
     </body>
   </html>
